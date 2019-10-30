@@ -11,6 +11,7 @@
 #include <math.h>
 #include <iostream>
 #include <sstream>
+#include"EmptyDataCollectionException.h"
 
 using namespace std;
 
@@ -119,7 +120,7 @@ class BinaryHeap {
         void resizeArray(ElementType *&anArray, int size, float multiplier){
             int newSize=(int)size*multiplier;
             int *resized = new int [newSize];
-            for (int i=0;i< elementCount;i++){
+            for (int i=0;i<=elementCount;i++){
                 resized[i]=anArray[i];
             }
 
@@ -147,64 +148,87 @@ class BinaryHeap {
     // Description: Returns "true" is this Binary Heap is empty, otherwise "false".
     // Postcondition:  The Binary Heap is unchanged by this operation.
     // Time Efficiency: O(1)
-    bool isEmpty() const {
-        if (elementCount==0) {
-            return true;
-        }
-        else return false;
-    }
+    bool isEmpty() const;
 
     // Description: Inserts newElement in this Binary Heap and 
     //              returns "true" if successful, otherwise "false".
     // Time Efficiency: O(log2 n)
-    bool insert(ElementType& newElement) {
-        if (elementCount>(capacity-1)){
-            int multiplier = 2;
-            resizeArray(BHeap,capacity,multiplier);
-            capacity=capacity*multiplier;
-        }
-
-        else {
-            indexOfBottom=elementCount;
-            BHeap[indexOfBottom] = newElement;
-            elementCount++;
-            reMinHeapUp(indexOfBottom);
-            printArray();
-            printHeap();
-        }
-    }
+    bool insert(ElementType& newElement);
 
     // Description: Removes (but does not return) the element located at the root.
     // Precondition: This Binary Heap is not empty.
     // Exception: Throws EmptyDataCollectionException if Binary Heap is empty.
     // Time Efficiency: O(log2 n)
-    void remove() { //throw(EmptyDataCollectionException);
-        indexOfBottom = elementCount-1;
-        //enforce check on precondition
-        if (!isEmpty()){
-            swapElements(indexOfBottom,indexOfRoot);
-            elementCount--;
-            reMinHeapDown(indexOfRoot);
-            //exclude removed element from heap by decrementing elementCount.
-            printHeap();
-        }
-        else {
-            cout<<"error: attempting to remove from an empty binary heap."<<endl;        
-        }
-    }
+    void remove() throw(EmptyDataCollectionException);
+
     
     // Description: Returns (but does not remove) the element located at the root.
     // Precondition: This Binary Heap is not empty.   
     // Exception: Throws EmptyDataCollectionException if Binary Heap is empty.
     // Time Efficiency: O(1)
-    ElementType& retrieve() { //throw(EmptyDataCollectionException);
-        //enforce check on precondition
-        if (!isEmpty()){
-            return BHeap[indexOfRoot];
-        }
-        else cout<<"error: attempting to retrieve from an empty binary heap."<<endl;
-    }
+    ElementType& retrieve() throw(EmptyDataCollectionException);
+
     /******* Binary Heap Public Interface - END - *******/
 
 };
+
+template <class ElementType>
+bool BinaryHeap<ElementType>::isEmpty() const {
+    if (elementCount==0) {
+        return true;
+    }
+    else return false;
+}
+
+template <class ElementType>
+bool BinaryHeap<ElementType>::insert(ElementType& newElement) {
+    if (elementCount>=(capacity-1)){
+        int multiplier = 2;
+        resizeArray(BHeap,capacity,multiplier);
+        capacity=capacity*multiplier;
+    }
+
+        indexOfBottom=elementCount;
+        BHeap[indexOfBottom] = newElement;
+        elementCount++;
+        reMinHeapUp(indexOfBottom);
+        // printArray();
+        // printHeap();
+}
+
+template <class ElementType>
+void BinaryHeap<ElementType>::remove() throw(EmptyDataCollectionException) {
+    indexOfBottom = elementCount-1;
+    if (elementCount<=(capacity/4)){
+        float multiplier = 0.5;
+        resizeArray(BHeap,capacity,multiplier);
+        capacity=(int)capacity*multiplier;
+    }
+    //enforce check on precondition
+    if (!isEmpty()){
+        swapElements(indexOfBottom,indexOfRoot);
+        elementCount--;
+        reMinHeapDown(indexOfRoot);
+        //exclude removed element from heap by decrementing elementCount.
+        // printHeap();
+    }
+    else {
+        cout<<"error: attempting to remove from an empty binary heap."<<endl;  
+        throw(EmptyDataCollectionException("error: remove() called on an empty binary heap."));      
+    }
+}
+
+template <class ElementType>
+ElementType& BinaryHeap<ElementType>::retrieve() throw(EmptyDataCollectionException) {
+    //enforce check on precondition
+    if (!isEmpty()){
+        return BHeap[indexOfRoot];
+    }
+    else {
+        cout<<"error: attempting to retrieve from an empty binary heap."<<endl;
+        throw(EmptyDataCollectionException("error: retrieve() called on an empty binary heap."));
+    }
+}
+
+
 //end of BinaryHeap.h

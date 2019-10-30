@@ -9,7 +9,7 @@
  */
  
 #pragma once
-d
+
 #include <stdexcept>
 #include <string>
 
